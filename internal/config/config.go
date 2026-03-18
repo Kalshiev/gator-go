@@ -6,25 +6,77 @@ import (
 	"os"
 )
 
-func Read() Config {
+const configFileName = ".gatorconfig.json"
+
+type Config struct {
+	Db_URL            string `json:"db_url"`
+	Current_user_name string `json:"current_user_name"`
+}
+
+func (c *Config) SetUser(user string) error {
+	c.Current_user_name = user
+	err := write(*c)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func getConfigFilePath() (string, error) {
+	configDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	return configDir + "/" + configFileName, nil
+}
+
+func write(cfg Config) error {
+	path, err := getConfigFilePath()
+	if err != nil {
+		return err
+	}
+
+	flags := os.O_CREATE | os.O_TRUNC | os.O_WRONLY
+
+	permissions := os.FileMode(0644)
+
+	file, err := os.OpenFile(path, flags, permissions)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	enc := json.NewEncoder(file)
+	err = enc.Encode(cfg)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func Read() (Config, error) {
 	path, err := getConfigFilePath()
 	if err != nil {
 		fmt.Printf("path error: %v", err)
-		return Config{}
+		return Config{}, err
 	}
 
 	file, err := os.Open(path)
 	if err != nil {
 		fmt.Printf("dir error: %v", err)
-		return Config{}
+		return Config{}, err
 	}
 
 	var config Config
 	decoder := json.NewDecoder(file)
 	if err := decoder.Decode(&config); err != nil {
 		fmt.Printf("json decode error: %v", err)
-		return Config{}
+		return Config{}, err
 	}
 
-	return config
+	return config, nil
 }
