@@ -79,3 +79,16 @@ func handlerRegister(s *state, cmd command) error {
 
 	return nil
 }
+
+func handlerReset(s *state, cmd command) error {
+	ctx := context.Background()
+
+	err := s.db.ResetUsers(ctx)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("All users deleted!")
+
+	return nil
+}
