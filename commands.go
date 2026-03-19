@@ -48,7 +48,7 @@ func handlerLogin(s *state, cmd command) error {
 		return errors.New("Could not set user")
 	}
 
-	fmt.Printf("User %s set", cmd.argv[0])
+	fmt.Printf("User %s set \n", cmd.argv[0])
 
 	return nil
 }
@@ -89,6 +89,25 @@ func handlerReset(s *state, cmd command) error {
 	}
 
 	fmt.Println("All users deleted!")
+
+	return nil
+}
+
+func handlerGetUsers(s *state, cmd command) error {
+	ctx := context.Background()
+
+	users, err := s.db.GetUsers(ctx)
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < len(users); i++ {
+		if users[i].Name == s.config.Current_user_name {
+			fmt.Printf("%s (current) \n", users[i].Name)
+			continue
+		}
+		fmt.Println(users[i].Name)
+	}
 
 	return nil
 }
