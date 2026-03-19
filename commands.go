@@ -1,8 +1,13 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/kalshiev/gator-go/internal/database"
 )
 
 type command struct {
@@ -31,12 +36,46 @@ func handlerLogin(s *state, cmd command) error {
 		return errors.New("No username found")
 	}
 
-	err := s.config.SetUser(cmd.argv[0])
+	ctx := context.Background()
+
+	getUser, err := s.db.GetUser(ctx, cmd.argv[0])
+	if err != nil {
+		return err
+	}
+
+	err = s.config.SetUser(getUser.Name)
 	if err != nil {
 		return errors.New("Could not set user")
 	}
 
 	fmt.Printf("User %s set", cmd.argv[0])
+
+	return nil
+}
+
+func handlerRegister(s *state, cmd command) error {
+	if len(cmd.argv) == 0 {
+		return errors.New("No username submitted")
+	}
+
+	ctx := context.Background()
+
+	insertUser, err := s.db.CreateUser(ctx, database.CreateUserParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      cmd.argv[0],
+	})
+	if err != nil {
+		return err
+	}
+
+	err = s.config.SetUser(insertUser.Name)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("User created succesfully!")
 
 	return nil
 }

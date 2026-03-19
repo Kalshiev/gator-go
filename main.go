@@ -1,14 +1,18 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"os"
 
 	"github.com/kalshiev/gator-go/internal/config"
+	"github.com/kalshiev/gator-go/internal/database"
+	_ "github.com/lib/pq"
 )
 
 type state struct {
 	config *config.Config
+	db     *database.Queries
 }
 
 func main() {
@@ -22,10 +26,21 @@ func main() {
 
 	currentState.config = &cfg
 
+	db, err := sql.Open("postgres", currentState.config.Db_URL)
+	if err != nil {
+		fmt.Println("Database connection failed")
+		os.Exit(1)
+	}
+
+	dbQueries := database.New(db)
+
+	currentState.db = dbQueries
+
 	cmds := commands{
 		cmdMap: make(map[string]func(*state, command) error),
 	}
 	cmds.register("login", handlerLogin)
+	cmds.register("register", handlerRegister)
 
 	if len(os.Args) < 2 {
 		fmt.Println("Not enough arguments provided")
