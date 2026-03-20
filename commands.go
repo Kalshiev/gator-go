@@ -125,3 +125,60 @@ func handlerAgg(s *state, cmd command) error {
 	fmt.Print(feed)
 	return nil
 }
+
+func handlerAddFeed(s *state, cmd command) error {
+	if len(cmd.argv) < 2 {
+		return errors.New("No name and url provided")
+	}
+
+	ctx := context.Background()
+
+	fName := cmd.argv[0]
+	fUrl := cmd.argv[1]
+
+	currentUser, err := s.db.GetUser(ctx, s.config.Current_user_name)
+	if err != nil {
+		return err
+	}
+
+	feed, err := s.db.CreateFeed(ctx, database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		Name:      fName,
+		Url:       fUrl,
+		UserID:    currentUser.ID,
+	})
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Added %s to user %s's feed\n", feed.Name, currentUser.Name)
+	fmt.Print(feed)
+
+	return nil
+
+}
+
+func handlerFeeds(s *state, cmd command) error {
+	ctx := context.Background()
+
+	feeds, err := s.db.ListFeeds(ctx)
+	if err != nil {
+		return nil
+	}
+
+	for i := 0; i < len(feeds); i++ {
+		userName, err := s.db.GetUserByID(ctx, feeds[i].UserID)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("Feed: %d\n", i)
+		fmt.Printf("name: %s\n", feeds[i].Name)
+		fmt.Printf("URL: %s\n", feeds[i].Url)
+		fmt.Printf("User: %s\n\n", userName.Name)
+	}
+
+	return nil
+}
