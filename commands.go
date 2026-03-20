@@ -111,3 +111,17 @@ func handlerGetUsers(s *state, cmd command) error {
 
 	return nil
 }
+
+func handlerAgg(s *state, cmd command) error {
+	url := "https://www.wagslane.dev/index.xml"
+
+	ctx := context.Background()
+
+	feed, err := fetchFeed(ctx, url)
+	if err != nil {
+		return err
+	}
+
+	fmt.Print(feed)
+	return nil
+}
