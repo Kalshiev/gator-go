@@ -50,11 +50,20 @@ func handlerLogin(s *state, cmd command) error {
 		return errors.New("No username found")
 	}
 
+	var passwd string
+	fmt.Printf("Please enter your password: ")
+	fmt.Scanln(&passwd)
+
 	ctx := context.Background()
 
 	getUser, err := s.db.GetUser(ctx, cmd.argv[0])
 	if err != nil {
 		return err
+	}
+
+	match := VerifyPassword(passwd, getUser.PasswordHash)
+	if !match {
+		return fmt.Errorf("Incorrect Password!")
 	}
 
 	err = s.config.SetUser(getUser.Name)
@@ -72,13 +81,20 @@ func handlerRegister(s *state, cmd command) error {
 		return errors.New("No username submitted")
 	}
 
+	var passwd string
+	fmt.Printf("Please Enter your password: ")
+	fmt.Scanln(&passwd)
+
+	hash, _ := HashPassword(passwd)
+
 	ctx := context.Background()
 
 	insertUser, err := s.db.CreateUser(ctx, database.CreateUserParams{
-		ID:        uuid.New(),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		Name:      cmd.argv[0],
+		ID:           uuid.New(),
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+		Name:         cmd.argv[0],
+		PasswordHash: hash,
 	})
 	if err != nil {
 		return err

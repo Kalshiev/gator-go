@@ -41,10 +41,10 @@ func main() {
 		cmdUsage: make(map[string]usage),
 	}
 	cmds.register("login", handlerLogin)
-	cmds.registerUsage("login", "gator login [username]", "Logs in an existing user")
+	cmds.registerUsage("login", "gator login [username]; [password]", "Logs in an existing user")
 
 	cmds.register("register", handlerRegister)
-	cmds.registerUsage("register", "gator register [username]", "Creates a new user with username [username]")
+	cmds.registerUsage("register", "gator register [username]; [password]", "Creates a new user with username [username] and [password]")
 
 	cmds.register("reset", handlerReset)
 	cmds.registerUsage("reset", "gator reset", "Drops all tables from database. ONLY IN DEV MODE")
