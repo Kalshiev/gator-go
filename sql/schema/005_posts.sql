@@ -4,7 +4,7 @@ CREATE TABLE posts (
     created_at TIMESTAMPTZ NOT NULL,
     updated_at TIMESTAMPTZ NOT NULL,
     title TEXT NOT NULL,
-    url TEXT NOT NULL,
+    url TEXT NOT NULL UNIQUE,
     description TEXT NULL,
     published_at TIMESTAMPTZ NOT NULL,
     feed_id UUID NOT NULL,
