@@ -10,7 +10,7 @@ func handlerHelp(s *state, cmd command) error {
 		return nil
 	} else {
 		if _, exists := cmd.help[cmd.argv[0]]; !exists {
-			return fmt.Errorf("Command does not exist")
+			return fmt.Errorf("%s command does not exist", cmd.argv[0])
 		}
 
 		fmt.Printf("command: %s\n", cmd.argv[0])
